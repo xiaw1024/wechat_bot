@@ -6,6 +6,7 @@ const env = dotenv.config().parsed // 环境参数
 
 const configuration = new Configuration({
   apiKey: env.OPENAI_API_KEY,
+  baseURL:env.OPENAI_BASE_URL,
 })
 const openai = new OpenAIApi(configuration)
 
