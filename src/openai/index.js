@@ -1,14 +1,10 @@
 import { remark } from 'remark'
 import stripMarkdown from 'strip-markdown'
-import { Configuration, OpenAIApi } from 'openai'
+import OpenAI from 'openai'
 import dotenv from 'dotenv'
 const env = dotenv.config().parsed // 环境参数
 
-const configuration = new Configuration({
-  apiKey: env.OPENAI_API_KEY,
-  baseURL:env.OPENAI_BASE_URL,
-})
-const openai = new OpenAIApi(configuration)
+const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY, baseURL: env.OPENAI_BASE_URL })
 
 export async function getGptReply(prompt) {
   console.log('🚀🚀🚀 / prompt', prompt)
@@ -32,15 +28,17 @@ export async function getGptReply(prompt) {
     reply = markdownToText(response.data.choices[0].text)
   } else if (chosen_model == 'gpt-3.5-turbo') {
     console.log('🚀🚀🚀 / Using model', chosen_model)
-    const response = await openai.createChatCompletion({
+    const response = await openai.chat.completions.create({
       model: chosen_model,
       messages: [
-        { "role": "system", content: "You are a personal assistant." },
-        { "role": "user", content: prompt }
-      ]
+        { role: 'system', content: 'You are a personal assistant.' },
+        { role: 'user', content: prompt },
+      ],
     })
 
-    reply = markdownToText(response.data.choices[0].message.content)
+    console.log(response)
+
+    reply = markdownToText(response.choices[0].message.content)
   }
   console.log('🚀🚀🚀 / reply', reply)
   return `${reply}\nVia ${chosen_model}`
@@ -52,5 +50,3 @@ function markdownToText(markdown) {
     .processSync(markdown ?? '')
     .toString()
 }
-
-
