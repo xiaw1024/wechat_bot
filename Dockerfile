@@ -1,49 +1,36 @@
 ARG APT_SOURCE="default"
 
-FROM node:19 as builder-default
-ENV NPM_REGISTRY="https://registry.npmjs.org"
+FROM node:20-alpine as base
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache bash \
+      ca-certificates \
+      chromium-chromedriver \
+      chromium \
+      coreutils \
+      curl \
+      ffmpeg \
+      figlet \
+      jq \
+      moreutils \
+      ttf-freefont \
+      udev \
+      vim \
+      xauth \
+      xvfb \
+    && rm -rf /tmp/* /var/cache/apk/*
 
-FROM node:19 as builder-aliyun
 
+FROM base as builder-default
 ENV NPM_REGISTRY="https://registry.npmmirror.com"
-RUN sed -i s/deb.debian.org/mirrors.aliyun.com/g /etc/apt/sources.list \
-    && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
-FROM builder-${APT_SOURCE} AS builder
-# Instal the 'apt-utils' package to solve the error 'debconf: delaying package configuration, since apt-utils is not installed'
-# https://peteris.rocks/blog/quiet-and-unattended-installation-with-apt-get/
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-    apt-utils \
-    autoconf \
-    automake \
-    bash \
-    build-essential \
-    ca-certificates \
-    chromium \
-    coreutils \
-    curl \
-    ffmpeg \
-    figlet \
-    git \
-    gnupg2 \
-    jq \
-    libgconf-2-4 \
-    libtool \
-    libxtst6 \
-    moreutils \
-    python-dev \
-    shellcheck \
-    sudo \
-    tzdata \
-    vim \
-    wget \
-  && apt-get purge --auto-remove \
-  && rm -rf /tmp/* /var/lib/apt/lists/*
+FROM base as builder-aliyun
+ENV NPM_REGISTRY="https://registry.npmmirror.com"
 
-FROM builder
 
-ENV CHROME_BIN="/usr/bin/chromium" \
+FROM builder-${APT_SOURCE}
+
+ENV CHROME_BIN="/usr/bin/chromium-browser" \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
 
 RUN mkdir -p /app

@@ -1,7 +1,7 @@
 import { WechatyBuilder, ScanStatus, log } from 'wechaty'
 import inquirer from 'inquirer'
 import qrTerminal from 'qrcode-terminal'
-import { defaultMessage, shardingMessage } from './sendMessage.js'
+import { defaultMessage } from './sendMessage.js'
 import dotenv from 'dotenv'
 const env = dotenv.config().parsed // 环境参数
 
@@ -62,7 +62,7 @@ export const bot = WechatyBuilder.build({
   // puppet: 'wechaty-puppet-wechat', // 如果 wechaty-puppet-wechat 存在问题，也可以尝试使用上面的 wechaty-puppet-wechat4u ，记得安装 wechaty-puppet-wechat4u
   puppetOptions: {
     uos: true,
-    ...CHROME_BIN
+    ...CHROME_BIN,
   },
 })
 
@@ -102,27 +102,4 @@ function handleStart(type) {
   }
 }
 
-const serveList = [
-  { name: 'ChatGPT', value: 'ChatGPT' },
-  { name: 'Kimi', value: 'Kimi' },
-  // ... 欢迎大家接入更多的服务
-]
-const questions = [
-  {
-    type: 'list',
-    name: 'serviceType', //存储当前问题回答的变量key，
-    message: '请先选择服务类型',
-    choices: serveList,
-  },
-]
-function init() {
-  inquirer
-    .prompt(questions)
-    .then((res) => {
-      handleStart(res.serviceType)
-    })
-    .catch((error) => {
-      console.log('🚀error:', error)
-    })
-}
-init()
+handleStart(env.SERVER_NAME)

@@ -1,5 +1,3 @@
-import { getGptReply } from '../openai/index.js'
-import { getKimiReply } from '../kimi/index.js'
 import { botName, roomWhiteList, aliasWhiteList } from '../../config.js'
 import { getServe } from './serve.js'
 
@@ -10,7 +8,7 @@ import { getServe } from './serve.js'
  * @param ServiceType 服务类型 'GPT' | 'Kimi'
  * @returns {Promise<void>}
  */
-export async function defaultMessage(msg, bot, ServiceType = 'GPT') {
+export async function defaultMessage(msg, bot, ServiceType = 'ChatGPT') {
   const getReply = getServe(ServiceType)
   const contact = msg.talker() // 发消息人
   const receiver = msg.to() // 消息接收人
@@ -27,7 +25,7 @@ export async function defaultMessage(msg, bot, ServiceType = 'GPT') {
   // TODO 你们可以根据自己的需求修改这里的逻辑
   if (isText && !isBotSelf) {
     console.log(JSON.stringify(msg))
-    if ((Date.now() - 1e3 * msg.payload.timestamp) > 3000) return
+    if (Date.now() - 1e3 * msg.payload.timestamp > 3000) return
     if (!content.startsWith('? ') && !content.startsWith('？ ') && !content.startsWith('> ')) return
     try {
       const trimed = content.substr(2)
